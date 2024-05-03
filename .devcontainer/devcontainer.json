@@ -1,0 +1,24 @@
+{
+  "name": "Java",
+  "image": "mcr.microsoft.com/devcontainers/java:1-17",
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "none",
+      "installMaven": "true",
+      "installGradle": "false"
+    }
+  },
+
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "streetsidesoftware.code-spell-checker",
+        "vscjava.vscode-java-pack"
+      ]
+    }
+  }
+}
