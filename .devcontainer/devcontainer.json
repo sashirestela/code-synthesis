@@ -4,9 +4,13 @@
 
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
-      "version": "none",
+      "version": "17",
+      "jdkDistro": "ms",
       "installMaven": "true",
       "installGradle": "false"
+    },
+    "ghcr.io/devcontainers-contrib/features/node-asdf:0": {
+      "version": "latest"
     }
   },
 
