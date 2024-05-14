@@ -13,15 +13,20 @@ beforeEach(() => {
     dom = new JSDOM(`
     <!DOCTYPE html>
     <html lang="en">
+
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Bakery Inventory Management System</title>
-        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="styles.css" rel="stylesheet">
     </head>
+
     <body>
         <div class="container">
             <h1 class="my-4">Bakery Inventory Management System</h1>
+
+            <!-- Form for adding items -->
             <form id="addItemForm">
                 <h2>Add Item</h2>
                 <div class="form-group">
@@ -42,6 +47,7 @@ beforeEach(() => {
                 </div>
                 <button type="submit" class="btn btn-primary">Add</button>
             </form>
+            <!-- Table for displaying items -->
             <h2 class="my-4">Inventory</h2>
             <table class="table" id="itemsTable">
                 <thead>
@@ -54,8 +60,11 @@ beforeEach(() => {
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Items will be dynamically added here -->
                 </tbody>
             </table>
+
+            <!-- Modal for delete confirmation -->
             <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog" role="document">
@@ -70,13 +79,14 @@ beforeEach(() => {
                             Are you sure you want to delete this item?
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Confirm Delete</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
         <div id="spinner" class="modal" tabindex="-1" role="dialog"
             style="display: none; background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -85,10 +95,11 @@ beforeEach(() => {
                 </div>
             </div>
         </div>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="main.js"></script>
     </body>
+
     </html>
     `);
 
@@ -96,6 +107,12 @@ beforeEach(() => {
     container = dom.window.document.body;
     global.window = dom.window;
     global.document = dom.window.document;
+    global.bootstrap = {
+        Modal: jest.fn(() => ({
+            show: jest.fn(),
+            hide: jest.fn(),
+        })),
+    };
 
     // Clear all mocks before each test
     fetchMock.resetMocks();

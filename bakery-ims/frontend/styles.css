@@ -1,0 +1,34 @@
+/* styles.css */
+
+/* Define Roboto font for the entire document */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Titles */
+h1, h2 {
+    color: #2c3e50;
+}
+
+/* Form */
+#addItemForm {
+    background-color: #ecf0f1;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* Table */
+#itemsTable {
+    border-collapse: collapse;
+}
+
+#itemsTable th {
+    background-color: #ecf0f1;
+}
+
+#itemsTable th, #itemsTable td {
+    padding: 10px;
+    border: 1px solid #bdc3c7;
+}

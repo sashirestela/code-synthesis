@@ -87,7 +87,8 @@ function addItemToTable(item) {
 // Function to delete an item
 function deleteItem(id) {
     // Show the delete confirmation modal
-    $('#deleteModal').modal('show');
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'))
+    deleteModal.show()
 
     // If the user confirms the deletion, make a DELETE request to the backend
     document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
@@ -116,7 +117,7 @@ function deleteItem(id) {
             });
 
         // Hide the delete confirmation modal
-        $('#deleteModal').modal('hide');
+        deleteModal.hide();
     });
 }
 
