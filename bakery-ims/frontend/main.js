@@ -4,24 +4,21 @@ const hostUrl = "https://cuddly-lamp-pj5pxv7v5w3r5wq-8080.app.github.dev"
 
 // Function to load items from the backend
 function loadItems() {
-    fetch(hostUrl + `/items`, {method: 'GET', mode: 'cors'})
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        // Add each item to the table
-        data.forEach(item => addItemToTable(item));
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+    fetch(hostUrl + `/items`, { method: 'GET', mode: 'cors' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Add each item to the table
+            data.forEach(item => addItemToTable(item));
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
 }
-
-// Load items when the page loads
-window.onload = loadItems;
 
 // Function to add a new item
 function addItem(event) {
@@ -33,11 +30,8 @@ function addItem(event) {
     const quantity = document.getElementById('quantity').value;
     const price = document.getElementById('price').value;
 
-    // Validate form values
-    if (!name || !quantity || !price) {
-        alert('Please fill out all required fields.');
-        return;
-    }
+    // Show the spinner
+    document.getElementById('spinner').style.display = 'block';
 
     // Make a POST request to the backend
     fetch(hostUrl + `/items`, {
@@ -47,29 +41,47 @@ function addItem(event) {
         },
         body: JSON.stringify({ name, description, quantity, price }),
     })
-    .then(response => response.json())
-    .then(data => {
-        // Add the new item to the table
-        addItemToTable(data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            // Add the new item to the table
+            addItemToTable(data);
+
+            // Clean form values
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('quantity').value = '';
+            document.getElementById('price').value = '';
+
+            // Hide the spinner
+            document.getElementById('spinner').style.display = 'none';
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+
+            // Hide the spinner
+            document.getElementById('spinner').style.display = 'none';
+        });
 }
 
 // Function to add an item to the table
 function addItemToTable(item) {
-    const table = document.getElementById('itemsTable');
-    const row = table.insertRow();
+    const tBody = document.querySelector('#itemsTable tbody');
+    const row = tBody.insertRow();
     row.innerHTML = `
         <td>${item.name}</td>
         <td>${item.description}</td>
         <td>${item.quantity}</td>
         <td>${item.price}</td>
         <td>
-            <button class="btn btn-danger" onclick="deleteItem(${item.id})">Delete</button>
+            <button class="btn btn-danger" data-item-id="${item.id}">Delete</button>
         </td>
     `;
+
+    // Add the event listener to the Delete button
+    const deleteButton = row.querySelector('.btn-danger');
+    deleteButton.addEventListener('click', () => {
+        deleteItem(item.id);
+    });
 }
 
 // Function to delete an item
@@ -79,21 +91,28 @@ function deleteItem(id) {
 
     // If the user confirms the deletion, make a DELETE request to the backend
     document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+        // Show the spinner
+        document.getElementById('spinner').style.display = 'block';
+
         fetch(hostUrl + `/items/${id}`, {
             method: 'DELETE',
         })
             .then(() => {
                 // Remove the item from the table
-                const table = document.getElementById('itemsTable');
-                for (let i = 1; i < table.rows.length; i++) {
-                    if (table.rows[i].cells[0].innerText == id) {
-                        table.deleteRow(i);
-                        break;
-                    }
+                const button = document.querySelector(`#itemsTable tbody tr [data-item-id="${id}"]`);
+                if (button) {
+                    const row = button.parentNode.parentNode;
+                    row.remove();
                 }
+
+                // Hide the spinner
+                document.getElementById('spinner').style.display = 'none';
             })
             .catch((error) => {
                 console.error('Error:', error);
+
+                // Hide the spinner
+                document.getElementById('spinner').style.display = 'none';
             });
 
         // Hide the delete confirmation modal
@@ -101,5 +120,17 @@ function deleteItem(id) {
     });
 }
 
-// Add the addItem function as an event listener for the form submission event
-document.getElementById('addItemForm').addEventListener('submit', addItem);
+function setEventListeners() {
+    // Add the addItem function as an event listener for the form submission event
+    document.getElementById('addItemForm').addEventListener('submit', addItem);
+}
+
+window.onload = function () {
+    loadItems();
+    setEventListeners();
+}
+
+if (typeof module !== 'undefined') {
+    module.exports = { loadItems, setEventListeners, addItemToTable };
+}
+// main.js
