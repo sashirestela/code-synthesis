@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.encora.ai.bakeryims.model.Item;
@@ -20,11 +22,6 @@ public class ItemController {
 
     @Autowired
     private ItemRepository repository;
-
-    @GetMapping
-    public List<Item> getAllItems() {
-        return repository.findAll();
-    }
 
     @GetMapping("/{id}")
     public Item getItemById(@PathVariable Long id) {
@@ -41,8 +38,32 @@ public class ItemController {
         repository.deleteById(id);
     }
 
-    public Item updateItem(@RequestBody Item item) {
-        return repository.save(item);
+    @PutMapping("/{id}")
+    public Item updateItem(@PathVariable Long id, @RequestBody Item item) {
+        // Check if item exists
+        Item existingItem = repository.findById(id).orElse(null);
+        if (existingItem == null) {
+            return null;
+        }
+
+        // Update item
+        existingItem.setName(item.getName());
+        existingItem.setDescription(item.getDescription());
+        existingItem.setQuantity(item.getQuantity());
+        existingItem.setPrice(item.getPrice());
+        
+        return repository.save(existingItem);
+    }
+
+    @GetMapping
+    public List<Item> getAllItems(@RequestParam(required = false) String search) {
+        if (search != null) {
+            // Search for items
+            return repository.findByNameContainingOrDescriptionContaining(search, search);
+        } else {
+            // Return all items
+            return repository.findAll();
+        }
     }
 
 }

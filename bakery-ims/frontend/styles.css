@@ -13,22 +13,13 @@ h1, h2 {
 }
 
 /* Form */
-#addItemForm {
+#itemForm {
     background-color: #ecf0f1;
-    padding: 20px;
+    padding: 25px;
     border-radius: 5px;
 }
 
 /* Table */
-#itemsTable {
-    border-collapse: collapse;
-}
-
 #itemsTable th {
     background-color: #ecf0f1;
-}
-
-#itemsTable th, #itemsTable td {
-    padding: 10px;
-    border: 1px solid #bdc3c7;
 }
