@@ -2,19 +2,26 @@
 
 const hostUrl = "https://cuddly-lamp-pj5pxv7v5w3r5wq-8080.app.github.dev"
 
-let itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
-let deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
+const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+const spinner = document.getElementById('spinner');
 
 // Function to load items from the backend
 function loadItems() {
+    showSpinner();
+
     fetch(hostUrl + `/items`, { method: 'GET', mode: 'cors' })
         .then(response => response.json())
         .then(data => {
             // Add each item to the table
             data.forEach(item => addItemToTable(item));
+
+            hideSpinner();
         })
         .catch((error) => {
             console.error('Error:', error);
+
+            hideSpinner();
         });
 }
 
@@ -40,8 +47,7 @@ function saveItem(event) {
     const quantity = document.getElementById('quantity').value;
     const price = document.getElementById('price').value;
 
-    // Show the spinner
-    document.getElementById('spinner').style.display = 'block';
+    showSpinner();
 
     // Determine the request method and URL
     const method = id ? 'PUT' : 'POST';
@@ -71,17 +77,14 @@ function saveItem(event) {
             document.getElementById('quantity').value = '';
             document.getElementById('price').value = '';
 
-            // Hide the Item form modal
             itemModal.hide();
 
-            // Hide the spinner
-            document.getElementById('spinner').style.display = 'none';
+            hideSpinner();
         })
         .catch((error) => {
             console.error('Error:', error);
 
-            // Hide the spinner
-            document.getElementById('spinner').style.display = 'none';
+            hideSpinner();
         });
 }
 
@@ -134,8 +137,7 @@ function populateForm(id) {
 function deleteItem(id) {
     // If the user confirms the deletion, make a DELETE request to the backend
     document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-        // Show the spinner
-        document.getElementById('spinner').style.display = 'block';
+        showSpinner();
 
         fetch(hostUrl + `/items/${id}`, {
             method: 'DELETE',
@@ -148,20 +150,16 @@ function deleteItem(id) {
                     row.remove();
                 }
 
-                // Hide the delete confirmation modal
                 deleteModal.hide();
 
-                // Hide the spinner
-                document.getElementById('spinner').style.display = 'none';
+                hideSpinner();
             })
             .catch((error) => {
                 console.error('Error:', error);
 
-                // Hide the delete confirmation modal
                 deleteModal.hide();
 
-                // Hide the spinner
-                document.getElementById('spinner').style.display = 'none';
+                hideSpinner();
             });
     });
 }
@@ -170,8 +168,7 @@ function deleteItem(id) {
 function searchItems() {
     const search = document.getElementById('searchInput').value;
 
-    // Show the spinner
-    document.getElementById('spinner').style.display = 'block';
+    showSpinner();
 
     fetch(hostUrl + `/items?search=${search}`, { method: 'GET' })
         .then(response => response.json())
@@ -191,14 +188,12 @@ function searchItems() {
                 row.innerHTML = '<td colspan="6" class="text-center">No items found</td>';
             }
 
-            // Hide the spinner
-            document.getElementById('spinner').style.display = 'none';
+            hideSpinner();
         })
         .catch((error) => {
             console.error('Error:', error);
 
-            // Hide the spinner
-            document.getElementById('spinner').style.display = 'none';
+            hideSpinner();
         });
 }
 
@@ -212,6 +207,14 @@ function setEventListeners() {
     // Add the searchItems function as an event listener for the search button click event
     document.getElementById('searchButton').addEventListener('click', searchItems);
 
+}
+
+function showSpinner() {
+    spinner.style.display = 'block';
+}
+
+function hideSpinner() {
+    spinner.style.display = 'none';
 }
 
 window.onload = function () {
