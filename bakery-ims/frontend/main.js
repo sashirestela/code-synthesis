@@ -2,16 +2,21 @@
 
 const hostUrl = "https://cuddly-lamp-pj5pxv7v5w3r5wq-8080.app.github.dev"
 
-const itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
-const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-const spinner = document.getElementById('spinner');
+let itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
+let deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+let spinner = document.getElementById('spinner');
 
 // Function to load items from the backend
 function loadItems() {
-    showSpinner();
+    document.getElementById('spinner').style.display = 'block';
 
-    fetch(hostUrl + `/items`, { method: 'GET', mode: 'cors' })
-        .then(response => response.json())
+    fetch(hostUrl + `/items`, { method: 'GET' })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             // Add each item to the table
             data.forEach(item => addItemToTable(item));
@@ -217,12 +222,12 @@ function hideSpinner() {
     spinner.style.display = 'none';
 }
 
-window.onload = function () {
+window.addEventListener('load', function () {
     loadItems();
     setEventListeners();
-}
+});
 
 if (typeof module !== 'undefined') {
-    module.exports = { loadItems, clearForm, setEventListeners, addItemToTable, updateItemInTable, populateForm, deleteItem, searchItems };
+    module.exports = { loadItems, clearForm, setEventListeners, addItemToTable, updateItemInTable, populateForm, deleteItem, searchItems, showSpinner, hideSpinner };
 }
 // main.js
