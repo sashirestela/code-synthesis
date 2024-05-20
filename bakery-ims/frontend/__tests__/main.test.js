@@ -48,6 +48,7 @@ test('loadItems fetches items from the server and adds them to the table', async
         { id: 1, name: 'Item 1', description: 'Description 1', quantity: 10, price: 5.5 },
         { id: 2, name: 'Item 2', description: 'Description 2', quantity: 20, price: 10.5 }
     ]));
+    mockResponseForAlertCount();
 
     window.loadItems();
 
@@ -69,6 +70,7 @@ test('loadItems fetches items from the server and adds them to the table', async
 test('addItem sends a POST request to the server and adds the new item to the table', async () => {
     // Mock the fetch response
     fetchMock.mockResponseOnce(JSON.stringify({ id: 3, name: 'Item 3', description: 'Description 3', quantity: 30, price: 15.5 }));
+    mockResponseForAlertCount();
 
     window.setEventListeners();
 
@@ -103,6 +105,7 @@ test('deleteItem sends a DELETE request to the server and removes the item from 
 
     // Mock the fetch response
     fetchMock.mockResponseOnce({ status: 200 });
+    mockResponseForAlertCount();
 
     // Click the delete button
     fireEvent.click(document.querySelector('#itemsTable .btn-danger'));
@@ -127,7 +130,10 @@ test('updateItem sends a PUT request to the server and updates the item in the t
     window.setEventListeners();
 
     // Mock the fetch response
-    fetchMock.mockResponseOnce(JSON.stringify({ id: 1, name: 'Item 1 Updated', description: 'Description 1 Updated', quantity: 20, price: 10 }));
+    fetchMock.mockResponseOnce(JSON.stringify(
+        { id: 1, name: 'Item 1 Updated', description: 'Description 1 Updated', quantity: 20, price: 10 }
+    ));
+    mockResponseForAlertCount();
 
     // Click the edit button
     fireEvent.click(document.querySelector('#itemsTable .btn-primary'));
@@ -159,6 +165,7 @@ test('searchItems filters the items in the table based on the search query', asy
         { id: 2, name: 'Item 2', description: 'Description 2', quantity: 20, price: 10.5 },
         { id: 3, name: 'Item 3', description: 'Description 3', quantity: 20, price: 15.5 }
     ]));
+    mockResponseForAlertCount();
 
     window.loadItems();
 
@@ -174,6 +181,7 @@ test('searchItems filters the items in the table based on the search query', asy
     fetchMock.mockResponseOnce(JSON.stringify([
         { id: 2, name: 'Item 2', description: 'Description 2', quantity: 20, price: 10.5 }
     ]));
+    mockResponseForAlertCount();
 
     // Click the search button
     fireEvent.click(document.getElementById('searchButton'));
@@ -186,3 +194,54 @@ test('searchItems filters the items in the table based on the search query', asy
     expect(rows.length).toBe(1);
     expect(rows[0].children[1].textContent).toBe('Item 2');
 });
+
+test('getAlertCount fetches the alert count from the server and updates the UI', async () => {
+    // Mock the fetch response
+    fetchMock.mockResponseOnce(JSON.stringify( 5 ));
+
+    await window.getAlertCount();
+
+    // Check that the alert count was updated in the UI
+    expect(document.getElementById('alertCount').textContent).toBe('5');
+    expect(document.getElementById('alertBanner').className).toBe('btn btn-warning');
+});
+
+test('populateAlertModal fetches the pending alerts from the server and populates the alert modal', async () => {
+    // Mock the fetch response
+    fetchMock.mockResponseOnce(JSON.stringify([
+        { id: 1, item: { name: 'Item 1' }, message: 'Message 1' },
+        { id: 2, item: { name: 'Item 2' }, message: 'Message 2' }
+    ]));
+
+    await window.populateAlertModal();
+
+    // Check that the alerts were added to the alert list
+    expect(document.querySelectorAll('#alertList .card').length).toBe(2);
+});
+
+test('acknowledgeAlert sends a request to the server to acknowledge an alert and removes the alert card', async () => {
+    // Mock a response from the server with one alert row
+    fetchMock.mockResponseOnce(JSON.stringify([
+        { id: 1, item: { name: 'Item 1' }, message: 'Message 1' }
+    ]));
+
+    // Wait for the alert modal to be populated
+    await window.populateAlertModal();
+
+    // Check that the alert was added to the alert list
+    expect(document.querySelectorAll('#alertList .card').length).toBe(1);
+
+    // Mock a response from the server for acknowledge
+    fetchMock.mockResponseOnce({ status: 200 });
+    mockResponseForAlertCount();
+
+    // Wait for the acknowledgeAlert function to complete
+    await window.acknowledgeAlert(1);
+
+    // Check that the alert card has been removed from the alertModal
+    expect(document.querySelectorAll('#alertList .card').length).toBe(0);
+});
+
+function mockResponseForAlertCount() {
+    fetchMock.mockResponseOnce(JSON.stringify({ count: 0 }));
+}
