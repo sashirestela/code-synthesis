@@ -8,25 +8,20 @@ let spinner = document.getElementById('spinner');
 
 // Function to load items from the backend
 function loadItems() {
-    document.getElementById('spinner').style.display = 'block';
+    preAction();
 
-    fetch(hostUrl + `/items`, { method: 'GET' })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+    fetch(`${hostUrl}/items`, { method: 'GET' })
+        .then(response => response.json())
         .then(data => {
             // Add each item to the table
             data.forEach(item => addItemToTable(item));
 
-            hideSpinner();
+            postAction();
         })
         .catch((error) => {
             console.error('Error:', error);
 
-            hideSpinner();
+            postAction();
         });
 }
 
@@ -52,7 +47,7 @@ function saveItem(event) {
     const quantity = document.getElementById('quantity').value;
     const price = document.getElementById('price').value;
 
-    showSpinner();
+    preAction();
 
     // Determine the request method and URL
     const method = id ? 'PUT' : 'POST';
@@ -84,12 +79,12 @@ function saveItem(event) {
 
             itemModal.hide();
 
-            hideSpinner();
+            postAction();
         })
         .catch((error) => {
             console.error('Error:', error);
 
-            hideSpinner();
+            postAction();
         });
 }
 
@@ -142,9 +137,9 @@ function populateForm(id) {
 function deleteItem(id) {
     // If the user confirms the deletion, make a DELETE request to the backend
     document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
-        showSpinner();
+        preAction();
 
-        fetch(hostUrl + `/items/${id}`, {
+        fetch(`${hostUrl}/items/${id}`, {
             method: 'DELETE',
         })
             .then(() => {
@@ -157,14 +152,14 @@ function deleteItem(id) {
 
                 deleteModal.hide();
 
-                hideSpinner();
+                postAction();
             })
             .catch((error) => {
                 console.error('Error:', error);
 
                 deleteModal.hide();
 
-                hideSpinner();
+                postAction();
             });
     });
 }
@@ -173,9 +168,9 @@ function deleteItem(id) {
 function searchItems() {
     const search = document.getElementById('searchInput').value;
 
-    showSpinner();
+    preAction();
 
-    fetch(hostUrl + `/items?search=${search}`, { method: 'GET' })
+    fetch(`${hostUrl}/items?search=${search}`, { method: 'GET' })
         .then(response => response.json())
         .then(data => {
             // Get the table body
@@ -193,41 +188,96 @@ function searchItems() {
                 row.innerHTML = '<td colspan="6" class="text-center">No items found</td>';
             }
 
-            hideSpinner();
+            postAction();
         })
         .catch((error) => {
             console.error('Error:', error);
 
-            hideSpinner();
+            postAction();
         });
 }
 
-function setEventListeners() {
-    // Add the saveItem function as an event listener for the form submission event
-    document.getElementById('itemForm').addEventListener('submit', saveItem);
-
-    // Add the clearForm function as an event listener for the Add Item button click event
-    document.getElementById('addItemButton').addEventListener('click', clearForm);
-
-    // Add the searchItems function as an event listener for the search button click event
-    document.getElementById('searchButton').addEventListener('click', searchItems);
-
+// Fetch the total number of alerts and update the UI
+async function getAlertCount() {
+    const response = await fetch(`${hostUrl}/alerts/count?status=pending`);
+    const count = await response.json();
+    document.getElementById('alertCount').textContent = count;
+    document.getElementById('alertBanner').className = count > 0 ? 'btn btn-warning' : 'btn btn-outline-secondary';
 }
 
-function showSpinner() {
+// Fetch the details of all pending alerts and populate the alert modal
+async function populateAlertModal() {
+    const response = await fetch(`${hostUrl}/alerts?status=pending`);
+    const alerts = await response.json();
+    const alertList = document.getElementById('alertList');
+    alertList.innerHTML = '';
+    alerts.forEach(alert => {
+        const alertElement = document.createElement('div');
+        alertElement.className = 'card';
+        alertElement.innerHTML = `
+            <div class="card-body">
+                <h5 class="card-title">Item: ${alert.item.name}</h5>
+                <p class="card-text">Message: ${alert.message}</p>
+                <button class="btn btn-primary" data-alert-id="${alert.id}" onclick="acknowledgeAlert(${alert.id})">Acknowledge</button>
+            </div>
+        `;
+        alertList.appendChild(alertElement);
+    });
+}
+
+// Acknowledge an alert
+async function acknowledgeAlert(alertId) {
+    preAction();
+
+    await fetch(`${hostUrl}/alerts/${alertId}?status=acknowledged`, {
+        method: 'PATCH'
+    });
+
+    // Remove the alert from the modal
+    const button = document.querySelector(`#alertList button[data-alert-id="${alertId}"]`);
+    if (button) {
+        const alertElement = button.parentNode.parentNode;
+        alertElement.remove();
+    }
+    postAction();
+}
+
+function setEventListeners() {
+    document.getElementById('itemForm').addEventListener('submit', saveItem);
+    document.getElementById('addItemButton').addEventListener('click', clearForm);
+    document.getElementById('searchButton').addEventListener('click', searchItems);
+    document.getElementById('alertBanner').addEventListener('click', populateAlertModal);
+}
+
+function preAction() {
     spinner.style.display = 'block';
 }
 
-function hideSpinner() {
+function postAction() {
     spinner.style.display = 'none';
+    getAlertCount();
 }
 
 window.addEventListener('load', function () {
-    loadItems();
     setEventListeners();
+    loadItems();
 });
 
 if (typeof module !== 'undefined') {
-    module.exports = { loadItems, clearForm, setEventListeners, addItemToTable, updateItemInTable, populateForm, deleteItem, searchItems, showSpinner, hideSpinner };
+    module.exports = {
+        loadItems,
+        clearForm,
+        setEventListeners,
+        addItemToTable,
+        updateItemInTable,
+        populateForm,
+        deleteItem,
+        searchItems,
+        getAlertCount,
+        populateAlertModal,
+        acknowledgeAlert,
+        preAction,
+        postAction
+    };
 }
 // main.js
