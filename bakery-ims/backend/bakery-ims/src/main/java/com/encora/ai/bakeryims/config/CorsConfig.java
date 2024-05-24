@@ -1,4 +1,4 @@
-package com.encora.ai.bakeryims;
+package com.encora.ai.bakeryims.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

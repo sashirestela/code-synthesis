@@ -1,6 +1,6 @@
 // main.js
 
-const hostUrl = "https://cuddly-lamp-pj5pxv7v5w3r5wq-8080.app.github.dev"
+const hostUrl = "https://sashirestela-code-synthesis-code-redirect-3.apps.sandbox-m3.1530.p1.openshiftapps.com"
 
 let itemModal = new bootstrap.Modal(document.getElementById('itemModal'));
 let deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));

@@ -25,3 +25,6 @@ replay_pid*
 
 .vscode/
 node_modules/
+.classpath
+.project
+.settings/
